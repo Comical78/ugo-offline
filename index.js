@@ -1,8 +1,8 @@
 // imports and values
-require('dotenv').config();
 const fs = require('fs');
 const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = 3000;
 const NEW_URL_PREFIX = process.env.URL_PREFIX || 'https://localhost:3000/';
