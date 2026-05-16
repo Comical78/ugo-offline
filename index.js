@@ -11,15 +11,24 @@ app.get('/map_index.json', (req, res) => {
   const filePath = path.join(__dirname, 'files', 'map_index.json');
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
+      console.error("Eroare at file reading:", err);
       return res.status(500).send('Error at file reading');
     }
     try {
-      let jsonData = JSON.parse(data);
-      if (typeof jsonData.url === 'string' && jsonData.url.startsWith('https://static.resquared.studio/')) {
-        jsonData.url = jsonData.url.replace('https://static.resquared.studio/', NEW_URL_PREFIX);
+      const cleanData = data.replace(/^\uFEFF/, '');
+      let jsonData = JSON.parse(cleanData);
+      if (Array.isArray(jsonData)) {
+        jsonData = jsonData.map(item => {
+          if (item.mapZipUrl && item.mapZipUrl.startsWith('https://static.resquared.studio/'))
+            item.mapZipUrl = item.mapZipUrl.replace('https://static.resquared.studio/', NEW_URL_PREFIX);
+          if (item.mapIcon && item.mapIcon.startsWith('https://static.resquared.studio/'))
+            item.mapIcon = item.mapIcon.replace('https://static.resquared.studio/', NEW_URL_PREFIX);
+          return item;
+        });
       }
       res.json(jsonData);
     } catch (parseErr) {
+      console.error("Eroare at parsing:", parseErr);
       res.status(500).send('Error at JSON parsing');
     }
   });

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maps</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #00adb5;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #2d2d2d;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #00adb5;
+        }
+        .icon-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .map-icon {
+            width: 64px;
+            height: 64px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: #333;
+        }
+        .map-name {
+            font-size: 1.4rem;
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        .info {
+            font-size: 0.9rem;
+            color: #aaaaaa;
+            margin: 5px 0;
+        }
+        .info strong {
+            color: #00adb5;
+        }
+        .btn-download {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            background-color: #00adb5;
+            color: white;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+        .btn-download:hover {
+            background-color: #007c82;
+        }
+        .error {
+            color: #ff5555;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maps</h1>
+    <div class="container" id="maps-container">Loading maps...</div>
+    <script>
+        fetch('/map_index.json')
+            .then(response => {
+                if (!response.ok)
+                    throw new Error('Couldn\'t load any map');
+                return response.json();
+            })
+            .then(mape => {
+                const container = document.getElementById('maps-container');
+                container.innerHTML = '';
+                if (mape.length === 0) {
+                    container.innerHTML = '<p>Couldn\'t find any map</p>';
+                    return;
+                }
+                mape.forEach(mapa => {
+                    const iconUrl = mapa.mapIcon ? mapa.mapIcon : '/map.svg';
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="icon-container">
+                            <img class="map-icon" src="${iconUrl}" alt="${mapa.mapName}">
+                        </div>
+                        <h2 class="map-name">${mapa.mapName}</h2>
+                        <p class="info"><strong>ID:</strong> ${mapa.mapId}</p>
+                        <p class="info"><strong>Spawn:</strong> ${mapa.mapSpawnPos}</p>
+                        <a href="${mapa.mapZipUrl}" class="btn-download">Download (.zip)</a>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('maps-container').innerHTML = `
+                    <p class="error">Erorr at loading data: ${error.message}</p>
+                `;
+            });
+    </script>
+</body>
+</html>
